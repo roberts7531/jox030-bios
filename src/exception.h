@@ -1,6 +1,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+#define EXCTYPE_MASK_VECTOR 0x0FFF
 struct StackFrame0{
     uint16_t sr;
     uint32_t pc;
