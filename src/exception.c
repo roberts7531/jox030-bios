@@ -46,7 +46,8 @@ void __attribute__((interrupt)) screenFlashHandler(void){
 void __attribute__((interrupt)) genericHandler(void){
     
     stackFrame = (struct StackFrame0*)((uint32_t*)__builtin_frame_address(0) + 1);
-    print("\nException!\n");
+    print(vectorNames[stackFrame->excType&EXCTYPE_MASK_VECTOR]);
+    print(" Exception!\n");
     setMode(GPU_MODE_COLOR);
     volatile uint8_t* vram = (uint8_t*)GPU_VRAM_BASE;
     for(uint32_t i = 0;i<65536;i++){
