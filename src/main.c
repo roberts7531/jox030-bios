@@ -7,7 +7,7 @@
 
 volatile uint64_t counter;
 void delayLoop(){
-    counter = 300000;
+    counter = 150000;
     while(counter>0){
         counter--;
     }
@@ -16,6 +16,7 @@ void delayLoop(){
 
 // Example usage
 void main() {
+    initGPU(); // clearing vram before delay in case of reset, looks kinda trash otherwise
     delayLoop();
     initGPU();
     print("Hello, World!\n");
