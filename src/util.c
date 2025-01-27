@@ -1,19 +1,32 @@
 #include "util.h"
 #include <stdint.h>
 
-void uint32_to_hex(uint32_t value, char *buffer) {
+void uint_to_hex(uint32_t value, char *buffer, int fixed_size, bool include_prefix) {
     const char *hex_chars = "0123456789ABCDEF";
-    buffer[0] = '0'; // Prefix
-    buffer[1] = 'x';
-    for (int i = 0; i < 8; i++) {
-        buffer[9 - i] = hex_chars[value & 0xF]; // Get last 4 bits
-        value >>= 4;                           // Shift right by 4 bits
+    int start = 0;
+
+    if (include_prefix) {
+        buffer[0] = '0';
+        buffer[1] = 'x';
+        start = 2;
     }
-    buffer[10] = '\0'; // Null-terminate the string
+
+    if (fixed_size > 8) {
+        fixed_size = 8;
+    }
+
+    for (int i = 0; i < fixed_size; i++) {
+        int shift = (fixed_size - 1 - i) * 4; // Calculate shift for current nibble
+        buffer[start++] = hex_chars[(value >> shift) & 0xF];
+    }
+
+    buffer[start] = '\0'; // Null-terminate the string
 }
 
-void printNumHex(uint32_t num){
-    char buffer[11];
-    uint32_to_hex(num, buffer);
+void printNumHex(uint32_t num, int fixed_size, bool include_prefix) {
+    char buffer[11]; 
+    uint_to_hex(num, buffer, fixed_size, include_prefix);
     print(buffer);
 }
+
+
