@@ -105,7 +105,7 @@ void configureFilters(){
 
 void waitForOST(){
     volatile uint16_t counter = 0xffff;
-    while(read_enc_register(ENC_REG_ESTAT)&1 != 1){
+    while(read_enc_register(ENC_REG_ESTAT) & BIT_ESTAT_CLKRDY  != 1){
         if(counter==0) {
             print("Timeout waiting for clkrdy!\n");
             break;
@@ -170,8 +170,8 @@ void configurePHY(){
 }
 
 void setupReception(){
-    write_enc_register(ENC_REG_EIE,0xc0);
-    write_enc_register(ENC_REG_ECON1,0x04);
+    bitFieldSet(ENC_REG_EIE, BIT_EIE_INTIE | BIT_EIE_PKTIE);
+    bitFieldSet(ENC_REG_ECON1, BIT_ECON1_RXEN);
 }
 void initialize(){
     installHandler(28,(uint32_t) networkInterrupt);
