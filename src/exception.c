@@ -31,6 +31,7 @@ void __attribute__((interrupt)) genericHandler(void){
     print(" Exception!\n");
     printStackFrame(stackFrame);
     print("\n");
+    __asm("move #0x2700,%sr"); //Interrupts off, infinite loop, end of the road
     while(1);
 }
 
@@ -47,5 +48,5 @@ void initializeGenericHandling(){
     for(int i = 2; i<255;i++ ){
         *(vector+i) = (uint32_t) genericHandler;
     }
-    __asm("move    #0x2000,%sr");
+    __asm("move #0x2000,%sr");
 }
