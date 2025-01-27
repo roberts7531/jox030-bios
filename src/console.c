@@ -1,7 +1,5 @@
 #include <stdint.h>
-#define SCREEN_WIDTH  80
-#define SCREEN_HEIGHT 50
-#define FRAMEBUFFER   ((volatile unsigned char*) 0xc0800000) // Replace with your framebuffer base address
+#include "gpu.h"
 
 // Cursor position
 uint8_t cursor_x = 0;
@@ -25,7 +23,7 @@ void print_char(char c) {
     }
 
     // Write the character to the framebuffer at the current cursor position
-    FRAMEBUFFER[cursor_y * SCREEN_WIDTH + cursor_x] = c;
+    GPU_VRAM_BASE[cursor_y * SCREEN_WIDTH + cursor_x] = c;
 
     // Move the cursor to the next position
     cursor_x++;
