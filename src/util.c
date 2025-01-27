@@ -23,10 +23,36 @@ void uint_to_hex(uint32_t value, char *buffer, int fixed_size, bool include_pref
     buffer[start] = '\0'; // Null-terminate the string
 }
 
+
 void printNumHex(uint32_t num, int fixed_size, bool include_prefix) {
     char buffer[11]; 
     uint_to_hex(num, buffer, fixed_size, include_prefix);
     print(buffer);
+}
+
+void hexDump(void *addr, uint32_t length) {
+    uint8_t *data = (uint8_t *)addr;
+    print("Starting hexdump at: ");
+    printNumHex((uint32_t)data, 8, true);
+    print("\n");
+
+    for (size_t i = 0; i < length; i += 16) {
+        printNumHex(i,8, true);
+        print(": ");
+
+        for (size_t j = 0; j < 16 && i + j < length; ++j) {
+            printNumHex(data[i + j], 2, false);
+            print(" ");
+        }
+
+        print("  ");
+        for (size_t j = 0; j < 16 && i + j < length; ++j) {
+            unsigned char c = data[i + j];
+            print((c >= 32 && c <= 126) ? (char[]){(char)c, '\0'} : (char[]){'.', '\0'});
+        }
+
+        print("\n");
+    }
 }
 
 
