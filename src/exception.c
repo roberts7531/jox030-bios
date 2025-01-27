@@ -1,18 +1,12 @@
 #include <stdint.h>
 #include "exception.h"
+#include "uart.h"
+#include "gpu.h"
+#include <stdbool.h>
+#include "util.h"
 
 struct StackFrame0* stackFrame;
 
-void uint32_to_hex(uint32_t value, char *buffer) {
-    const char *hex_chars = "0123456789ABCDEF";
-    buffer[0] = '0'; // Prefix
-    buffer[1] = 'x';
-    for (int i = 0; i < 8; i++) {
-        buffer[9 - i] = hex_chars[value & 0xF]; // Get last 4 bits
-        value >>= 4;                           // Shift right by 4 bits
-    }
-    buffer[10] = '\0'; // Null-terminate the string
-}
 
 void printStackFrame(struct StackFrame0* frame){
     char buffer[11];
@@ -28,10 +22,42 @@ void printStackFrame(struct StackFrame0* frame){
     print("\n");
 }
 
+volatile bool isRed  = false;
+volatile int dummy2;
+void __attribute__((interrupt)) screenFlashHandler(void){
+    
+    dummy2 = UART_READ_REGS->stopCounter;
+    dummy2 = UART_READ_REGS->ISR;
+    struct Color color;
+    color.green = 0;
+    color.blue = 0;
+    if(isRed){
+        color.red = 0;
+        setColor(0,&color);
+        isRed =false;
+    }else{
+        color.red = 0xff;
+        setColor(0,&color);
+        isRed = true;
+    }
+
+}
+
 void __attribute__((interrupt)) genericHandler(void){
     
     stackFrame = (struct StackFrame0*)((uint32_t*)__builtin_frame_address(0) + 1);
     print("\nException!\n");
+    setMode(GPU_MODE_COLOR);
+    volatile uint8_t* vram = (uint8_t*)GPU_VRAM_BASE;
+    for(uint32_t i = 0;i<65536;i++){
+        *(vram+i) = 0;
+    }
+    struct Color color;
+    color.red = 0xff;
+    color.green = 0;
+    color.blue = 0;
+    setColor(0,&color);
+    installHandler(30,screenFlashHandler);
     printStackFrame(stackFrame);
     print("\n");
 

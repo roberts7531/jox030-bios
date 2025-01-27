@@ -7,7 +7,9 @@
 
 #define UART_READ_REGS ((volatile struct uartRegsRead*) UART_BASE)
 #define UART_WRITE_REGS ((volatile struct uartRegsWrite*) UART_BASE)
-
+#define GPIO_MOSI 1
+#define GPIO_SCK 2
+#define GPIO_MISO 0
 
 struct uartRegsRead{
     volatile uint8_t MRA;
@@ -47,4 +49,7 @@ struct uartRegsWrite{
     volatile uint8_t resetOutput;
 };
 void ioTest(void);
+uint8_t spiExchange(uint8_t csPin, uint8_t dataOut);
+void setOutput(uint8_t pin);
+void resetOutPut(uint8_t pin);
 #endif
