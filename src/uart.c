@@ -3,17 +3,18 @@
 #include "exception.h"
 
 volatile bool uartPresent = false;
-volatile bool ledState = false;
 volatile int dummy;
+volatile uint16_t tickCount = 0;
+
+void waitTicks(uint16_t ticks) {
+    uint16_t startTick = tickCount;  // Store the current tickCount
+    while (((tickCount - startTick) & 0xFFFF) < ticks);
+}
 
 void __attribute__((interrupt)) systemTickHandler(void){
     dummy = UART_READ_REGS->stopCounter;
     dummy = UART_READ_REGS->ISR;
-    if(ledState){
-        ledState =false;
-    }else{
-        ledState = true;
-    }
+    tickCount++;
 }
 
 void __attribute__((interrupt)) detectUartHandler(void){
@@ -23,7 +24,6 @@ void __attribute__((interrupt)) detectUartHandler(void){
     uartPresent = true;
     installHandler(30,(uint32_t)systemTickHandler);
 }
-
 
 void detectUart(){
     //installHandler();
