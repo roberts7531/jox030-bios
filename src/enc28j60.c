@@ -32,16 +32,7 @@ uint8_t read_enc_register_macmii(uint8_t reg){
     return data;
 }
 
-void read_enc_buffer(uint16_t address,uint16_t len, uint8_t* data){
-    resetOutPut(ENC_CS);
-    spiExchange(0,SPI_OPCODE_RBM|0x1a);
-    while(len>0){
-        *data = spiExchange(0,0xff);
-        data++;
-        len--;
-    }
-    setOutput(ENC_CS);
-}
+
 
 void bitFieldSet(uint8_t reg, uint8_t bit){
     resetOutPut(ENC_CS);
@@ -61,6 +52,25 @@ void setBank(uint8_t bank) {
     write_enc_register(ENC_REG_ECON1,(ori&0xfE)| (bank & 7));   
 }
 
+void write_enc_register_bank(uint8_t reg, uint8_t bank, uint8_t data){
+    setBank(bank);
+    write_enc_register(reg,data);
+}
+
+void read_enc_buffer(uint16_t len, uint8_t* data){
+    resetOutPut(ENC_CS);
+    spiExchange(0,SPI_OPCODE_RBM|0x1a);
+    while(len>0){
+        *data = spiExchange(0,0xff);
+        data++;
+        len--;
+    }
+    setOutput(ENC_CS);
+}
+void set_enc_buffer_pointer(uint16_t address){
+    write_enc_register_bank(ENC_REG_B0_ERDPTL,0,address&0xff);
+    write_enc_register(ENC_REG_B0_ERDPTH,address>>8);
+}
 
 void write_enc_phy_register(uint8_t reg, uint16_t data){
     setBank(2);
@@ -111,33 +121,16 @@ void onPacketReceive(){
     printNumHex(packetCount);
     uint8_t nextPackLow;
     uint8_t nextPackHigh;
-    read_enc_buffer(nextPacketPointer,1,&nextPackLow);
-    read_enc_buffer(nextPacketPointer+1,1,&nextPackHigh);
+    set_enc_buffer_pointer(nextPacketPointer);
+    read_enc_buffer(1,&nextPackLow);
+    read_enc_buffer(1,&nextPackHigh);
     uint16_t nextPacket = (nextPackHigh<<8)|nextPackLow;
     print("next packet at:");
     printNumHex(nextPacket);
-    read_enc_buffer(nextPacketPointer+6,nextPacket-(nextPacketPointer+6),packetBuffer);
-    print("byte 0: ");
-    printNumHex(packetBuffer[0]);
-    print(" ");
-    printNumHex(packetBuffer[1]);
-    print(" ");
-    printNumHex(packetBuffer[2]);
-    print(" ");
-    printNumHex(packetBuffer[3]);
-    print(" ");
-    printNumHex(packetBuffer[4]);
-    print(" ");
-    printNumHex(packetBuffer[5]);
-    print(" ");
-    printNumHex(packetBuffer[6]);
-    print(" ");
-    
-    
-    
+    set_enc_buffer_pointer(nextPacketPointer+6);
+    read_enc_buffer(nextPacket-(nextPacketPointer+6),packetBuffer);
+    hexDump(packetBuffer,1518);
     bitFieldSet(ENC_REG_ECON2,BIT_ECON2_PKTDEC);
-
-
 }
 
 void __attribute__((interrupt)) networkInterrupt(void){
