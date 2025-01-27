@@ -183,3 +183,12 @@ void initialize(){
     setupReception();
     bitFieldSet(ENC_REG_ECON2,BIT_ECON2_AUTOINC);
 }
+
+void sendPacket(uint8_t* data, uint16_t length){
+    //set EWRPT to 0x1800
+    //set set ETXST to 0x1800
+    //write 0x0e control byte
+    //write packet data to buffer
+    //set etxnd to the end of packet
+    //set econ1.txrts
+}
